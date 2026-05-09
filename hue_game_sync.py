@@ -71,27 +71,27 @@ def pick_color(tricode, team_colors):
     return FALLBACK_COLORS.get(tricode, "#FFFFFF")
 
 def set_lights(rgb=None, temp=None, brightness=70, transition="2s"):
-    procs = []
-    for light in LIGHTS:
-        cmd = ["openhue", "set", "light", light, "--on",
-               "--brightness", str(brightness),
-               "--transition-time", transition]
-        if rgb:
-            cmd += ["--rgb", rgb]
-        elif temp:
-            cmd += ["--temperature", str(temp)]
-        procs.append(subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
-    for p in procs:
-        p.wait()
+    # All lights in one command = single bridge call = truly simultaneous
+    cmd = ["openhue", "set", "light"] + LIGHTS + [
+        "--on", "--brightness", str(brightness), "--transition-time", transition
+    ]
+    if rgb:
+        cmd += ["--rgb", rgb]
+    elif temp:
+        cmd += ["--temperature", str(temp)]
+    subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def pulse(team, color, points, restore_rgb=None, restore_temp=None):
     """1 flash for 2pts, 2 flashes for 3pts."""
     flashes = 2 if points >= 3 else 1
     label = "🔥 THREE" if points >= 3 else "🏀 SCORE"
     print(f"  {label} — {team} (+{points})")
-    for _ in range(flashes):
+    for i in range(flashes):
         set_lights(rgb=color, brightness=100, transition="0s")
-        time.sleep(0.2)
+        time.sleep(0.3)
+        if i < flashes - 1:
+            set_lights(rgb=color, brightness=20, transition="0s")  # visible dip between flashes
+            time.sleep(0.2)
     if restore_rgb:
         set_lights(rgb=restore_rgb, brightness=70, transition="1s")
     elif restore_temp:
