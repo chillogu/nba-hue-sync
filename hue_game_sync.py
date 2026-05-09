@@ -91,13 +91,11 @@ def pulse(team, color, points, restore_rgb=None, restore_temp=None):
     print(f"  {label} — {team} (+{points})")
     for _ in range(flashes):
         set_lights(rgb=color, brightness=100, transition="0s")
-        time.sleep(0.4)
-        set_lights(rgb=color, brightness=25, transition="0.3s")
-        time.sleep(0.35)
+        time.sleep(0.2)
     if restore_rgb:
-        set_lights(rgb=restore_rgb, brightness=70, transition="1.5s")
+        set_lights(rgb=restore_rgb, brightness=70, transition="1s")
     elif restore_temp:
-        set_lights(temp=restore_temp, brightness=65, transition="1.5s")
+        set_lights(temp=restore_temp, brightness=65, transition="1s")
 
 def is_break(status_text):
     t = (status_text or "").upper()
